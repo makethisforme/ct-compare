@@ -1,7 +1,7 @@
 # CTA Measurements Drafter — Design
 
 Date: 2026-11-19
-Status: draft, awaiting approval
+Status: approved 2026-11-19
 
 ## Intent
 
@@ -125,10 +125,10 @@ wording.
 
 Per line, shown as a colored dot next to the output line with a short reason on hover:
 
-- **Green:** matched to a known landmark, prior parsed, change < 5 mm.
+- **Green:** matched to a known landmark, prior parsed, change < 3 mm.
 - **Amber:** no prior found; matched only by fallback word overlap; left as
   dictated.
-- **Red:** any dimension differs by ≥ 5 mm (could be real growth or a typo such as
+- **Red:** any dimension differs by ≥ 3 mm (could be real growth or a typo such as
   3 vs 30); `cm` on either side; two prior lines mapping to the same landmark; two
   current lines mapping to the same landmark; a number that can't be read.
 
@@ -212,18 +212,18 @@ Playwright on the HTML).
   for meaning.
 - Fonts: `-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif`;
   monospace for text boxes and output (`ui-monospace, "SF Mono", Consolas, monospace`).
-- Light theme by default; follows the system dark setting.
+- Light theme by default; manual light/dark toggle only (does not follow the system setting). Choice remembered in this browser.
 
 ## Calls to check (decided by Claude, not the user)
 
 1. Insert ` (prior)` with a single space, keeping the current line's own spacing.
 2. Lines with an existing parenthetical or trailing free text are left untouched
    (amber), not merged.
-3. Red threshold for change is ≥ 5 mm on any dimension.
+3. Red threshold for change is ≥ 3 mm on any dimension (user set).
 4. Prior lines whose level is missing in the current block are dropped silently
    except for the muted "not used" note.
 5. Tabs persist in this browser's storage; Reset clears only the active tab.
-6. Dark mode follows the system setting.
+6. (Resolved by user: manual light/dark toggle only.)
 
 ## Left to the builder
 
