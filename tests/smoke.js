@@ -66,6 +66,19 @@ const shots = process.argv[2];
   assert.match(await page.textContent('#adminSummary'), new RegExp(n + ' of ' + n + ' examples pass'));
   if (shots) await page.screenshot({ path: shots + '/admin.png', fullPage: false });
 
+  // Help page
+  await page.click('#backBtn');
+  await page.click('#helpBtn');
+  assert.equal(await page.isVisible('#help'), true);
+  const demo = await page.textContent('#helpDemo');
+  assert.ok(demo.includes('Sinotubular junction (graft): 28 (27)'));
+  assert.ok(demo.includes('Not used from prior: Sinus of Valsalva (mechanical)'));
+  assert.ok((await page.textContent('#helpNums')).includes('Sinus of Valsalva (mechanical): 27 x 27 x 27'));
+  if (shots) await page.screenshot({ path: shots + '/help.png', fullPage: true });
+  await page.click('#helpTry');
+  assert.equal(await page.isVisible('#workspace'), true);
+  assert.ok((await page.inputValue('#prior')).includes('28 x 28 x 28(29 x 25)'));
+
   assert.deepEqual(errors, []);
   console.log('smoke OK');
   await browser.close();

@@ -236,6 +236,25 @@ dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
 .foot a { color: var(--accent-text); text-decoration: none; }
 .foot a:hover { text-decoration: underline; }
 
+.btn.round { width: 30px; padding: 0; justify-content: center; border-radius: 50%; font-weight: 600; }
+.help-sec { padding: 18px 22px; margin-bottom: 14px; }
+.help-sec h2 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+.help-sec p { margin: 0 0 10px; }
+.help-sec .ex-top h2 { margin: 0; }
+.help-sec .ex-grid { margin-top: 12px; }
+.muted { color: var(--muted); font-size: 13px; }
+.steps { margin: 0 0 10px; padding-left: 22px; }
+.steps li, .tips li { margin: 4px 0; }
+.tips { margin: 0 0 6px; padding-left: 20px; }
+code { font-family: var(--mono); font-size: 12px; background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+.dots-key { display: grid; gap: 8px; margin-bottom: 10px; }
+.dots-key .dot { display: inline-block; margin-right: 8px; }
+details { border-top: 1px solid var(--line); padding: 10px 0; }
+details:first-of-type { border-top: 0; }
+summary { cursor: pointer; font-weight: 500; }
+summary::marker { color: var(--faint); }
+details p { margin: 8px 0 0; color: var(--muted); }
+
 [hidden] { display: none !important; }
 @media (max-width: 760px) {
   .boxes { grid-template-columns: 1fr; }
@@ -252,6 +271,7 @@ dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   </div>
   <div class="title">CTA Measurements Drafter</div>
   <div class="spacer"></div>
+  <button type="button" class="btn ghost round" id="helpBtn" title="How to use" aria-label="How to use">?</button>
   <div class="seg" role="group" aria-label="Theme">
     <button type="button" data-theme-set="light">Light</button>
     <button type="button" data-theme-set="dark">Dark</button>
@@ -320,6 +340,71 @@ dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   <div id="examples"></div>
   <h2 style="font-size:15px;margin:26px 0 10px">Landmarks and recognized names</h2>
   <div class="card" style="overflow:hidden"><table class="syn" id="synTable"></table></div>
+</main>
+
+<main id="help" hidden>
+  <div class="admin-head">
+    <button type="button" class="btn" id="helpBack">‹ Back</button>
+    <h1>How to use</h1>
+  </div>
+
+  <section class="card help-sec">
+    <h2>Quick start</h2>
+    <ol class="steps">
+      <li><b>Current:</b> dictate or paste today’s measurements as you normally would, with no priors.</li>
+      <li><b>Prior:</b> paste the prior study’s measurements. Pasting the whole prior report is fine; only the aortic lines are used.</li>
+      <li>Check the dots, then press <b>Copy</b> and paste the output into your report.</li>
+    </ol>
+    <p class="muted">Optional: type the prior study in <b>Prior study</b> (e.g. “CTA 08/16/2024”). The header then reads “(prior values from CTA 08/16/2024 in parentheses)”.</p>
+  </section>
+
+  <section class="card help-sec">
+    <div class="ex-top"><h2>Example</h2><div class="spacer"></div><button type="button" class="btn" id="helpTry">Try it in a new tab</button></div>
+    <p class="muted">The prior has its own older priors in parentheses and a graft note. Those are handled automatically: old priors are dropped and matching ignores the “(graft)” note.</p>
+    <div class="ex-grid" id="helpDemo"></div>
+  </section>
+
+  <section class="card help-sec">
+    <h2>Numbers only (fastest)</h2>
+    <p>Paste the prior, then type just today’s numbers in order into <b>Numbers only</b> and press <b>Enter</b>. The tool writes the Current block using the prior’s labels, including notes like “(graft)”.</p>
+    <ul class="tips">
+      <li>Separate numbers with spaces or commas. Write multi-dimension values as <code>39x37x44</code> or <code>39 x 37 x 44</code>.</li>
+      <li>Type <code>-</code> to skip a line (for example, to drop Sinus of Valsalva).</li>
+      <li>With no prior pasted, the standard 10-line template is used (Sinus through Infrarenal).</li>
+      <li>Text-only prior lines, such as “Status post aortic valve replacement.”, are carried over and don’t use up a number.</li>
+    </ul>
+    <div class="ex-grid" id="helpNums"></div>
+  </section>
+
+  <section class="card help-sec">
+    <h2>Reading the dots</h2>
+    <div class="dots-key">
+      <div><i class="dot green"></i><b>Green:</b> matched to the prior; the change is under 3 mm.</div>
+      <div><i class="dot amber"></i><b>Amber:</b> no prior was found for this level, or the line was left exactly as dictated because it already has a comparison or extra text (e.g. “44, unchanged compared with…”).</div>
+      <div><i class="dot red"></i><b>Red:</b> check this line. Any dimension changed by 3 mm or more (real growth or a typo), a value is in cm, or the same level appears twice.</div>
+    </div>
+    <p class="muted">Hover over a line to see the reason. A green check at the top means nothing is red.</p>
+  </section>
+
+  <section class="card help-sec">
+    <h2>What it understands</h2>
+    <ul class="tips">
+      <li><b>Notes in labels:</b> “Sinotubular junction (graft)” matches “Sinotubular junction”. Your current labels are kept exactly as written.</li>
+      <li><b>Other templates:</b> “Aortic root at the sinus”, “Distal ascending aorta”, “Aortic arch”, “Proximal descending thoracic aorta” and “Distal descending thoracic aorta at the hiatus” map to the matching levels.</li>
+      <li><b>Full prior values kept:</b> <code>42 (40 x 38)</code>, with “mm” removed.</li>
+      <li><b>Deleted lines:</b> if you remove a level (often Sinus of Valsalva), its prior is not used and is listed under the output as “Not used from prior”.</li>
+      <li><b>Spacing:</b> spacing is flexible on both sides, e.g. <code>27(27)</code> or double spaces.</li>
+    </ul>
+  </section>
+
+  <section class="card help-sec">
+    <h2>FAQ</h2>
+    <details><summary>Does anything leave this computer?</summary><p>No. The page makes no network connections. Open tabs are remembered in this computer’s browser so a refresh doesn’t lose them. Use <b>Reset</b> or close the tab (×) when you’re done with a case.</p></details>
+    <details><summary>What are the tabs for?</summary><p>Each tab is a separate case. <b>+</b> adds one, double-click a tab’s name to rename it, and <b>×</b> closes it. <b>Reset</b> clears only the tab you’re on.</p></details>
+    <details><summary>A line didn’t get a prior. Why?</summary><p>Either the prior didn’t have that level (common for suprarenal/infrarenal), or the label wasn’t recognized. If a label you use often isn’t recognized, send it over and it can be added.</p></details>
+    <details><summary>Why was a line left as dictated?</summary><p>If you already dictated a comparison on that line, e.g. “48 (45 on 04/20/2011)” or “44, unchanged compared with…”, the tool won’t overwrite it.</p></details>
+    <details><summary>Copy didn’t work.</summary><p>Click in the output, select all (Ctrl+A) and copy (Ctrl+C), or try Chrome or Edge.</p></details>
+  </section>
 </main>
 
 <footer class="foot">Please send any feedback to Zaid Qureshi (<a href="mailto:muhammad.qureshi@yale.edu">muhammad.qureshi@yale.edu</a>)</footer>
@@ -1037,12 +1122,49 @@ dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1
   });
   el.back.addEventListener('click', function () { showAdmin(false); });
 
-  function showAdmin(on) {
-    el.workspace.hidden = on; el.admin.hidden = !on;
-    el.adminBtn.hidden = on;
-    if (on) renderAdmin();
+  function showView(name) {
+    el.workspace.hidden = name !== 'work';
+    el.admin.hidden = name !== 'admin';
+    $('help').hidden = name !== 'help';
+    el.adminBtn.hidden = name === 'admin';
+    $('helpBtn').hidden = name === 'help';
+    if (name === 'admin') renderAdmin();
+    if (name === 'help') renderHelp();
     window.scrollTo(0, 0);
   }
+  function showAdmin(on) { showView(on ? 'admin' : 'work'); }
+
+  var DEMO = {
+    current: 'Sinotubular junction (graft): 28\nMid ascending aorta (graft): 29\nAscending proximal to the brachiocephalic: 33\nAorta at the diaphragm: 20\nSuprarenal aorta: 19',
+    prior: 'Sinus of Valsalva (mechanical): 28 x 28 x 28(29 x 25)\nSinotubular junction (graft): 27(27)\nMid ascending aorta (graft): 30(30)\nAscending proximal to the brachiocephalic: 28(28)\nAorta at the diaphragm: 19(19)'
+  };
+  var NUM_DEMO = '27x27x27 28 29 33 27 26 22 20';
+  var NUM_PRIOR = 'Sinus of Valsalva (mechanical): 28 x 28 x 28\nSinotubular junction (graft): 27\nMid ascending aorta (graft): 30\nAscending proximal to the brachiocephalic: 28\nTop of the aortic arch proximal to left subclavian: 26\nProximal descending distal to left subclavian: 25\nMid descending thoracic aorta: 21\nAorta at the diaphragm: 19';
+  function renderHelp() {
+    var g = $('helpDemo'); g.innerHTML = '';
+    var res = C.merge({ current: DEMO.current, prior: DEMO.prior });
+    g.appendChild(col('Current (you dictate)', pre(DEMO.current)));
+    g.appendChild(col('Prior (you paste)', pre(DEMO.prior)));
+    var mini = document.createElement('div'); mini.className = 'out-mini';
+    renderLines(mini, res, false);
+    if (res.unused.length) {
+      var u = document.createElement('div'); u.className = 'unused'; u.style.padding = '6px 0 0';
+      u.textContent = 'Not used from prior: ' + res.unused.join(', ');
+      mini.appendChild(u);
+    }
+    g.appendChild(col('Output (you copy)', mini));
+    var n = $('helpNums'); n.innerHTML = '';
+    n.appendChild(col('Numbers only', pre(NUM_DEMO)));
+    n.appendChild(col('Prior (pasted)', pre(NUM_PRIOR)));
+    n.appendChild(col('Current (written for you)', pre(C.buildFromNumbers(NUM_DEMO, NUM_PRIOR).text)));
+  }
+  $('helpBtn').addEventListener('click', function () { showView('help'); });
+  $('helpBack').addEventListener('click', function () { showView('work'); });
+  $('helpTry').addEventListener('click', function () {
+    var t = newTab('Example');
+    t.current = DEMO.current; t.prior = DEMO.prior;
+    state.tabs.push(t); state.active = t.id; persist(); showView('work'); renderAll();
+  });
 
   function col(label, node) {
     var c = document.createElement('div'); c.className = 'ex-col';
